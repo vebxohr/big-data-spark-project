@@ -77,12 +77,13 @@ object Main {
 
     // Id, PostTypeId, CreationDate, Score, ViewCount, Body, OwnerUserId, LastActivityDate, Title, Tags, AnswerCount,
     // CommentCount, FavoriteCount, CloseDate
-    val posts = (LoadCsvToRDD(dataPath + "posts.csv", sc).map(row => (toInt(row(0)), toInt(row(1)),
+    val posts = LoadCsvToRDD(dataPath + "posts.csv", sc).map(row => (toInt(row(0)), toInt(row(1)),
       StringToDateTime(row(2)),toInt(row(3)), toInt(row(4)), new String(Base64.getDecoder.decode(row(5))),
       toInt(row(6)), StringToDateTime(row(7)), row(9), row(10), toInt(row(11)), toInt(row(12)),
-      StringToDateTime(row(13)))))
+      StringToDateTime(row(13))))
     // PostId, Score, Text, CreationDate, UserId
-    val comments = (LoadCsvToRDD(dataPath + "comments.csv", sc).map(row => (toInt(row(0)), toInt(row(1)), new String(Base64.getDecoder.decode(row(2))), StringToDateTime(row(3)), toInt(row(4)))))
+    val comments = LoadCsvToRDD(dataPath + "comments.csv", sc).map(row => (toInt(row(0)), toInt(row(1)),
+      new String(Base64.getDecoder.decode(row(2))), StringToDateTime(row(3)), toInt(row(4))))
     // Id, Reputation, CreationDate, DisplayName, LastAccessDate, AboutMe, Views, UpVotes, DownVotes
     val users = LoadCsvToRDD(dataPath + "users.csv", sc).map(row => (toInt(row(0)),
       toInt(row(1)), StringToDateTime(row(2)), row(3), row(4), row(5), toInt(row(6)), toInt(row(7)), toInt(row(8))))
@@ -156,29 +157,30 @@ object Main {
     val entropy = Entropy(commentCountByUser)
 
 
-    // 3.1
+    // 3.1 Graph of comments and posts users
     val simpleComments = comments.map(row => (row._1, row._5))
     val simplePosts = posts.map(row => (row._1, row._7))
     // (comment userID, post userID, weight) also includes comments on own posts
     val commentsPosts = simpleComments.join(simplePosts).map(row => ((row._2._1, row._2._2), 1)).reduceByKey(_ + _).map(row => (row._1._1, row._1._2, row._2))
 
-    // 3.2
+    // 3.2 Create Dataframe
     val columns = Seq("src", "dest", "weight")
     val commentsDF = spark.createDataFrame(commentsPosts).toDF(columns:_*)
 
-    // 3.3
+    // 3.3 UserIDs with most comments
     val topUsersComments = commentsDF.groupBy("src").agg(sum("weight")).orderBy(desc("sum(weight)"))
 
-    //3.4
+    //3.4 User displayname with most received comments
     val topReceivedComments = commentsDF.groupBy("dest").agg(sum("weight")).orderBy(desc("sum(weight)"))
 
     val usersDisplayName = spark.createDataFrame(users.map(row => (row._1, row._4))).toDF("userID", "displayName")
-    val topReceivedCommentsName = (topReceivedComments.alias("a").join(usersDisplayName.alias("b"),
+    val topReceivedCommentsName = topReceivedComments.alias("a").join(usersDisplayName.alias("b"),
       topReceivedComments("dest") === usersDisplayName("userID"),"inner")
-      .orderBy(desc("sum(weight)")).select("b.userID", "b.displayName","a.sum(weight)"))
+      .orderBy(desc("sum(weight)")).select("b.userID", "b.displayName","a.sum(weight)")
 
-    // 3.5
-    topReceivedCommentsName.coalesce(1).write.option("header", "true").option("sep", "\t").mode("overwrite").csv(writePath)
+    // 3.5 save DataFrame as CSV
+    topReceivedCommentsName.coalesce(1).write.option("header", "true").option("sep", "\t").mode("append").csv(writePath)
+
     // Print all answers
     // Answers to task 1:
     println("Task 1:")
@@ -207,7 +209,7 @@ object Main {
     println()
 
     // 2.4
-    println(s"# of users with less than 3 badges: ${badgeTask}")
+    println(s"# of users with less than 3 badges: $badgeTask")
     println()
 
     // 2.5
