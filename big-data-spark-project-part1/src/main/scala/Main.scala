@@ -193,7 +193,7 @@ object Main {
     //Answers to task 2:
     println("Task 2:")
     // 2.1
-    println(s"Average length of questions $averageComments")
+    println(s"Average length of questions $averageQuestions")
     println(s"Average length of answers $averageAnswers")
     println(s"Average length of comments $averageComments")
     println()
