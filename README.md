@@ -18,5 +18,5 @@ mining Big Data, data streams and analysis of time series, recommender systems, 
 
 The first part of the project uses actions and transformations on Spark RDDs to analyse the data. Some tasks are also to be solved using DataFrames and Spark SQL. 
 
-The second part of the porject uses Spark GraphX and DataFrames to calculate the PageRank of posts. 
+The second part of the project uses Spark GraphX and DataFrames to calculate the PageRank of posts. 
 
