@@ -152,7 +152,7 @@ object Main{
 
     // Id, PostTypeId, CreationDate, Score, ViewCount, Body, OwnerUserId, LastActivityDate, Title, Tags, AnswerCount,
     // CommentCount, FavoriteCount, CloseDate
-    val posts = LoadCsvToRDD(dataPath + "posts.csv", sc).map(row => (toInt(row(0)), toInt(row(1)),
+    val posts = LoadCsvToRDD(dataPath + "posts.csv.gz", sc).map(row => (toInt(row(0)), toInt(row(1)),
       StringToDateTime(row(2)),toInt(row(3)), toInt(row(4)), new String(Base64.getDecoder.decode(row(5))),
       toInt(row(6)), StringToDateTime(row(7)), row(9), row(10), toInt(row(11)), toInt(row(12)),
       StringToDateTime(row(13))))

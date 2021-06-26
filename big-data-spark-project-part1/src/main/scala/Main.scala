@@ -77,18 +77,18 @@ object Main {
 
     // Id, PostTypeId, CreationDate, Score, ViewCount, Body, OwnerUserId, LastActivityDate, Title, Tags, AnswerCount,
     // CommentCount, FavoriteCount, CloseDate
-    val posts = LoadCsvToRDD(dataPath + "posts.csv", sc).map(row => (toInt(row(0)), toInt(row(1)),
+    val posts = LoadCsvToRDD(dataPath + "posts.csv.gz", sc).map(row => (toInt(row(0)), toInt(row(1)),
       StringToDateTime(row(2)),toInt(row(3)), toInt(row(4)), new String(Base64.getDecoder.decode(row(5))),
       toInt(row(6)), StringToDateTime(row(7)), row(9), row(10), toInt(row(11)), toInt(row(12)),
       StringToDateTime(row(13))))
     // PostId, Score, Text, CreationDate, UserId
-    val comments = LoadCsvToRDD(dataPath + "comments.csv", sc).map(row => (toInt(row(0)), toInt(row(1)),
+    val comments = LoadCsvToRDD(dataPath + "comments.csv.gz", sc).map(row => (toInt(row(0)), toInt(row(1)),
       new String(Base64.getDecoder.decode(row(2))), StringToDateTime(row(3)), toInt(row(4))))
     // Id, Reputation, CreationDate, DisplayName, LastAccessDate, AboutMe, Views, UpVotes, DownVotes
-    val users = LoadCsvToRDD(dataPath + "users.csv", sc).map(row => (toInt(row(0)),
+    val users = LoadCsvToRDD(dataPath + "users.csv.gz", sc).map(row => (toInt(row(0)),
       toInt(row(1)), StringToDateTime(row(2)), row(3), row(4), row(5), toInt(row(6)), toInt(row(7)), toInt(row(8))))
     // UserId, Name, Date, Class
-    val badges = LoadCsvToRDD(dataPath + "badges.csv", sc).map(row => (toInt(row(0)), row(1),
+    val badges = LoadCsvToRDD(dataPath + "badges.csv.gz", sc).map(row => (toInt(row(0)), row(1),
       StringToDateTime(row(2)), row(3)))
 
 
